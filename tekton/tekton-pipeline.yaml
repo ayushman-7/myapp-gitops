@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-push-pipeline
+spec:
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: git-clone
+    taskRef:
+      name: git-clone
+    params:
+    - name: url
+      value: https://github.com/ayushman-7/myapp.git
+    - name: revision
+      value: main
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+  - name: build-and-push
+    taskRef:
+      name: kaniko
+    runAfter:
+    - git-clone
+    params:
+    - name: IMAGE
+      value: docker.io/ayushman7/myapp:latest
+    - name: DOCKERFILE
+      value: ./Dockerfile
+    workspaces:
+    - name: source
+      workspace: shared-workspace
